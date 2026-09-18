@@ -94,10 +94,12 @@
 # Super necessary for working across multiple computers or sharing code with others.
 # I use the following at the top of my code scripts:
 
+install.packages("rstudioapi")
 library(rstudioapi) # package to retrieve the relative path to the document location
 current_path <- getActiveDocumentContext()$path # extracting the current path
 setwd(dirname(current_path)) # setting the working directory as the location of the document
 
+current_path
 # A tidy and reproducible script is one with headers and lots of comments.
 
 #### Header ####
@@ -124,6 +126,11 @@ setwd(dirname(current_path)) # setting the working directory as the location of 
 1 < 2  # less than
 1 <= 1  # less than or equal to
 
+is.na(6) #added
+is.na(NA) #added
+
+mean(c(6,7,NA))
+mean(c(6,7,NA),na.rm=TRUE)
 # Use R to assign objects
 
 # Remember when I said the "Environment" shows all your objects?
@@ -132,7 +139,8 @@ setwd(dirname(current_path)) # setting the working directory as the location of 
 # Use the arrow (<-) or equal sign (=) to assign something to an object.
 
 x <- 1/40
-x
+x = 1/40
+x == 5
 x <- 24 # variables can easily be re-assigned/over-written
 y <- x * 2
 
@@ -149,9 +157,10 @@ y <- x * 2
 # Assign two numbers to two different objects, then add the objects together.
 # You can use ChatGPT or another AI tool to check your answer once you've tried it.
 
+z <- 7
+r <- 0.5
 
-
-
+z+r
 
 
 
@@ -209,7 +218,7 @@ my.series
 # (square brackets are used for indexing)
 
 my.letters[1]
-my.series[c(2:4)] # extracting multiple elements requires the c() function 
+my.series[c(2,3,4)] # extracting multiple elements requires the c() function 
 
 # We can also extract elements with comparison operators (e.g. >, <, ==).
 
@@ -250,17 +259,20 @@ data(dragons)
 head(dragons) # look at the first few rows
 dim(dragons) # look at the dimensions of the data frame
 colnames(dragons) # look at the names of the columns
+colnames(dragons)[c(5,7)] <- c("color", "NoLostTeeth") 
+str(dragons)  #added
 
 # If we look at the data, we can see that each column is a specific data type,
 # and we can index it with the operator $.
 # All columns in a data frame have to be the same data type.
-dragons$height
+class(dragons$weight)
 dragons$year_of_birth[1]
 
 # We could also use brackets to index specific elements of the data frame
 dragons[1,2] # [rows, columns]
 dragons[1,"height"]
 dragons[ ,1:3] # when you leave the rows or columns index empty, it extracts all rows or columns
+dragons[5:7,]
 
 # We can also check our data types in each column
 class(dragons$height)
@@ -284,13 +296,16 @@ class(dragons$colour)
 # We'll practice manipulating data frames, instead of just looking at them.
 
 # Let's create a new column to hold information on which dragons lost more or less than 10 teeth:
-dental.hygiene <- dragons$number_of_lost_teeth < 10
+dental.hygiene <- dragons$NoLostTeeth < 10
 dental.hygiene
 
 # We've simply created a vector with TRUE/FALSE values; but we can add this to our data frame using
 # cbind() aka column bind. There's also an rbind(), or row bind, function that works similarly.
 
 dragons <- cbind(dragons, dental.hygiene)
+
+dragons$dental.hygiene <- dental.hygiene
+dragons <- dragons%>%mutate(numberofeggs=1)
 head(dragons)
 
 # Each dragon now has a TRUE/FALSE value about their dental hygiene based on the lost teeth column. 
@@ -300,11 +315,18 @@ head(dragons)
 dragons$dental.hygiene[dragons$dental.hygiene==TRUE]<- "good"
 dragons$dental.hygiene[dragons$dental.hygiene==FALSE]<- "bad"
 
+dragons$scars[sample(1:nrow(dragons), size=20)] <- NA   #added
+table(is.na(dragons$scars))    #added
+which(is.na(dragons$scars))    #added
+
+dragons$scars[is.na(dragons$scars)] <-  0   #added
+dragons$scars[NA_scars] <- 0   #added
+
 # Finally, let's create a new column based on existing columns. Let's take the height and weight of each
 # dragon and see what the BMI is. 
 
 # First let's assume height is in centimeters and change that to meters.
-dragons$height <- dragons$height/100
+dragons$height <- dragons$height/1000
 
 # BMI is weight/height^2, so let's create a new column with that calculation from the height and weight columns.
 dragons$BMI <- dragons$weight/(dragons$height^2)
